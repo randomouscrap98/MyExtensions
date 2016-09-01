@@ -37,6 +37,11 @@ namespace MyExtensions.Logging
          //First, try to create the file if it doesn't exist (and a file was given)
          if (!string.IsNullOrWhiteSpace(logFile))
          {
+            //ENSURE that the log file is ALWAYS going to be written in the same place, even if we
+            //"change" directories from some other location.
+            if (!Path.IsPathRooted(logFile))
+               logFile = Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().CodeBase) + logFile;
+
             if (!File.Exists(logFile))
                File.Create(logFile).Close();
 
