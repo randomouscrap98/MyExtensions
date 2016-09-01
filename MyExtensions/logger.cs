@@ -40,7 +40,7 @@ namespace MyExtensions.Logging
             //ENSURE that the log file is ALWAYS going to be written in the same place, even if we
             //"change" directories from some other location.
             if (!Path.IsPathRooted(logFile))
-               logFile = Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().CodeBase) + logFile;
+               logFile = Path.Combine(Path.GetDirectoryName((new Uri(System.Reflection.Assembly.GetEntryAssembly().CodeBase)).LocalPath), logFile);
 
             if (!File.Exists(logFile))
                File.Create(logFile).Close();
