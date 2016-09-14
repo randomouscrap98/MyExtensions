@@ -47,6 +47,7 @@
     <Compile Include="SpecialPoint.cs" />
     <Compile Include="StringExtensions.cs" />
     <Compile Include="MyExtensionsData.cs" />
+    <Compile Include="SimpleTCPPinger.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
