@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Collections.Generic;
 using System.Net;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace MyExtensions
 {
@@ -13,7 +14,6 @@ namespace MyExtensions
       public readonly int Port;
       public readonly IPAddress Address; // = "127.0.0.1";
       public const int ThreadSleepMilliseconds = 10;
-      public const int MaxWaitSeconds = 5;
 
       //OUR CHILDREN WILL MAKE US PROUD
       public virtual string Identifier
@@ -26,17 +26,24 @@ namespace MyExtensions
          get { return 4096; }
       }
 
+      public virtual TimeSpan MaxWait
+      {
+         get { return TimeSpan.FromSeconds(5); }
+      }
+
+      protected virtual void Cleanup() { }
+
       protected virtual List<Action<byte[], NetworkStream>> MessageActions
       {
          get { return new List<Action<byte[], NetworkStream>>(); }
       }
 
+      protected MyExtensions.Logging.Logger logger = MyExtensions.Logging.Logger.DefaultLogger;
+
       //Server crap
       private bool stop = false;
       private TcpListener server;
       private Thread authSpinner = null;
-
-      private MyExtensions.Logging.Logger logger = MyExtensions.Logging.Logger.DefaultLogger;
 
       //Set up the server with the given logger. Otherwise, log to an internal logger
       public SimpleTCPPinger(IPAddress address, int port, MyExtensions.Logging.Logger logger = null)
@@ -125,6 +132,14 @@ namespace MyExtensions
             }
          }
 
+         Task cleanup = Task.Factory.StartNew(Cleanup);
+
+         if (!cleanup.Wait(MaxWait))
+         {
+            Log("The cleanup function did not complete in time! (" + MaxWait.TotalSeconds + ")", 
+               MyExtensions.Logging.LogLevel.Warning);
+         }
+
          //Deallocate thread if it's finally dead.
          if(!authSpinner.IsAlive)
          {
@@ -142,14 +157,15 @@ namespace MyExtensions
       //running, return false.
       private bool SpinWait()
       {
-         double waitTime = 0;
+         //double waitTime = 0;
+         DateTime start = DateTime.Now;
 
          //Do this for a bit while we wait for whatever the thread thinks it
          //needs to finish before actually finishing
-         while(authSpinner.IsAlive && waitTime < MaxWaitSeconds)
+         while(authSpinner.IsAlive && (DateTime.Now - start) < MaxWait)
          {
             Thread.Sleep(ThreadSleepMilliseconds);
-            waitTime += ThreadSleepMilliseconds / 1000.0;
+            //waitTime += ThreadSleepMilliseconds / 1000.0;
          }
 
          return !authSpinner.IsAlive;
@@ -177,7 +193,8 @@ namespace MyExtensions
                   NetworkStream stream = client.GetStream();
 
                   int i = 0;
-                  double wait = 0.0;
+                  //double wait = 0.0;
+                  DateTime start = DateTime.Now;
                   List<byte> fullData = new List<byte>();
 
                   //First, wait for data to become available or a timeout,
@@ -185,12 +202,12 @@ namespace MyExtensions
                   while(!stream.DataAvailable)
                   {
                      Thread.Sleep(ThreadSleepMilliseconds);
-                     wait += ThreadSleepMilliseconds / 1000.0;
+                     //wait += ThreadSleepMilliseconds / 1000.0;
 
                      //Oops, we waited too long for a response
-                     if(wait > MaxWaitSeconds)
+                     if((DateTime.Now - start) > MaxWait)
                      {
-                        throw new Exception("Read timeout reached (" + MaxWaitSeconds + " sec)");
+                        throw new Exception("Read timeout reached (" + MaxWait.TotalSeconds + " sec)");
                      }
                   }
 
