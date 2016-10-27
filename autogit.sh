@@ -18,6 +18,7 @@ fi
 echo "Autogit starting..."
 git add --all
 git commit -m "$1"
+git pull --rebase
 git push
 echo "Autogit complete!"
 

@@ -118,7 +118,7 @@ namespace MyExtensions
       /// <param name="filename"></param>
       /// <param name="saveObject"></param>
       /// <param name="expanded"></param>
-      public static void SaveObject<T>(string filename, T saveObject, bool expanded)
+      public static void SaveObject<T>(string filename, T saveObject, bool expanded = false)
       {
          JsonConvert.DefaultSettings = () => defaultSettings;
 
