@@ -76,8 +76,9 @@ namespace MyExtensions
 //            string json = File.ReadAllText(filename);
 //            loadObject = JsonConvert.DeserializeObject<T>(json, defaultSettings);
          }
-         catch //(Exception e)
+         catch (Exception e)
          {
+            Console.WriteLine("STUPID LOAD EXCEPTION: " + e);
             return false;
          }
 

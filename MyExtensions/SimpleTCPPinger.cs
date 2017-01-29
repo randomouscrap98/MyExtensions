@@ -13,9 +13,14 @@ namespace MyExtensions
    {
       public readonly int Port;
       public readonly IPAddress Address; // = "127.0.0.1";
-      public const int ThreadSleepMilliseconds = 10;
+      //public const int ThreadSleepMilliseconds = 10;
 
       //OUR CHILDREN WILL MAKE US PROUD
+      public virtual int ThreadSleepMilliseconds
+      {
+         get { return 10; }
+      }
+
       public virtual string Identifier
       {
          get { return this.GetType().Name; }
